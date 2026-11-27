@@ -1,0 +1,110 @@
+<%- include('partials/head') %>
+
+  <body>
+    <!-- Background -->
+    <div class="bg-layer">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <%- include('partials/header') %>
+
+      <main class="topics-page">
+        <div class="topics-container">
+          <h2 class="section-title">
+            <span class="title-icon">&#9733;</span>
+            Результаты поиска
+          </h2>
+
+          <!-- Filters 
+            <div class="topics-filters">
+              <div class="filter-group">
+                <label class="filter-label">Категория</label>
+                <select class="filter-select" id="categoryFilter">
+                  <option value="">Все категории</option>
+                  <% categories.forEach(categorie=> { %>
+                    <option value="<%= categorie.id %>">
+                      <%= categorie.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Категория</label>
+                <div class="section-tabs">
+                  <a href="/searchResults?sort=new" class="tab <%= sort === 'new' ? 'active' : '' %>">Новые</a>
+                  <a href="/searchResults?sort=popular" class="tab <%= sort === 'popular' ? 'active' : '' %>">Популярные</a>
+                  <a href="/searchResults?sort=empty" class="tab <%= sort === 'empty' ? 'active' : '' %>">Не популярные</a>
+                </div>
+              </div>
+            </div>
+          </div>-->
+
+          <!-- Topics List -->
+          <div class="topics-list-container">
+            <div class="topics-list-header">
+              <span class="header-cell topic-cell">Тема</span>
+              <span class="header-cell category-cell">Раздел</span>
+              <span class="header-cell replies-cell">Ответы</span>
+
+              <span class="header-cell activity-cell">Автор</span>
+            </div>
+
+            <div class="topics-list-body">
+
+              <!-- Regular Topics -->
+              <% selectTopics.forEach(top=> { %>
+                <div class="topic-list-row">
+                  <div class="topic-cell">
+                    <div class="topic-avatar">
+                      <div class="avatar-circle" style="--hue: 270;">
+                        <%= top.title[0].toUpperCase() %>
+                      </div>
+                    </div>
+                    <div class="topic-main-info">
+                      <a href="/topic/<%= top.id %>" class="topic-title-text">
+                        <%= top.title %>
+                      </a>
+                      <div class="topic-meta-row">
+                        <div class="topic-badges">
+                          <span class="topic-category-badge" style="--cat-color: #f755a6;">
+                            <%= top.description %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="category-cell">
+                    <span class="category-tag" style="--cat-color: #f59e0b;">
+                      <%= top.category_name %>
+                    </span>
+                  </div>
+                  <div class="replies-cell">
+                    <span class="stat-number">
+                      <%= top.posts_count %>
+                    </span>
+                  </div>
+                  
+                  <div class="activity-cell">
+                    <div class="last-activity">
+                      <a href="/user/prLk/<%= top.author_id %>" class="topic-user-link">
+                        <div class="topic-avatar-img">
+                          <img src="/img/avas/<%= top.author_avatar %>" />
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+
+
+            <% }) %>
+          </div>
+        </div>
+        </div>
+      </main>
+
+      <%- include('partials/footer') %>

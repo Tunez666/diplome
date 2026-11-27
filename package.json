@@ -1,0 +1,29 @@
+{
+  "name": "honkai-star-rail-community-forum",
+  "version": "1.0.0",
+  "description": "Coursework project: a gaming community forum built with Node.js, Express, MySQL and EJS",
+  "homepage": "https://github.com/Tunez666/diplome#readme",
+  "bugs": {
+    "url": "https://github.com/Tunez666/diplome/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tunez666/diplome.git"
+  },
+  "license": "ISC",
+  "author": "Tunez",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.1.1",
+    "mysql2": "^3.19.1"
+  }
+}

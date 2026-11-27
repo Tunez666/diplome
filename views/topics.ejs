@@ -1,0 +1,401 @@
+<%- include('partials/head') %>
+
+  <body>
+    <!-- Background -->
+    <div class="bg-layer">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <%- include('partials/header') %>
+
+      <main class="topics-page">
+        <div class="topics-container">
+          <!-- Page Header -->
+          <div class="topics-page-header">
+            <div class="page-title-row">
+              <h1 class="page-title">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Все темы
+              </h1>
+              <% if (user) { %>
+                <button class="create-btn" onclick="openCreateTopicModal()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Создать тему
+                </button>
+                <% } else { %>
+                  <a href="/login" class="btn btn-primary">
+                    Войти для создания темы
+                  </a>
+
+                  <% } %>
+
+            </div>
+
+            <!-- Filters -->
+            <div class="topics-filters">
+              <div class="filter-group">
+                <label class="filter-label">Родительский раздел</label>
+                <select class="filter-select" onchange="applyParent(this)">
+                  <option value="">Все разделы</option>
+
+                  <% categories.forEach(c=> { %>
+                    <option value="<%= c.id %>" <%=parentCategory==c.id ? 'selected' : '' %>>
+                      <%= c.name %>
+                    </option>
+                    <% }) %>
+                </select>
+
+                <label class="filter-label">Подраздел</label>
+                <select class="filter-select" id="childFilter" onchange="applyChild(this)">
+                  <option value="">Все подразделы</option>
+                </select>
+              </div>
+
+
+              <div class="filter-group">
+                <label class="filter-label">Фильтр</label>
+                <div class="section-tabs">
+                  <a href="/topics?sort=new" class="tab <%= sort === 'new' ? 'active' : '' %>">Новые</a>
+                  <a href="/topics?sort=popular" class="tab <%= sort === 'popular' ? 'active' : '' %>">Популярные</a>
+                  <a href="/topics?sort=empty" class="tab <%= sort === 'empty' ? 'active' : '' %>">Не популярные</a>
+                </div>
+              </div>
+              <div class="filter-group search-group">
+                <label class="filter-label">Поиск</label>
+                <div class="search-input-wrapper">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <form method="GET" action="/searchResults" class="search-form">
+                    <input type="text" name="search" class="search-input" placeholder="Поиск по темам...">
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Topics List -->
+          <div class="topics-list-container">
+            <div class="topics-list-header">
+              <span class="header-cell topic-cell">Тема</span>
+              <span class="header-cell category-cell">Раздел</span>
+              <span class="header-cell replies-cell">Ответы</span>
+              <span class="header-cell activity-cell">Автор</span>
+            </div>
+
+            <div class="topics-list-body">
+
+              <!-- Regular Topics -->
+              <% selectTopics.forEach(topic=> { %>
+                <div class="topic-list-row">
+                  <div class="topic-cell">
+                    <div class="topic-avatar">
+                      <div class="avatar-circle" style="--hue: 270;">
+                        <%= topic.title[0].toUpperCase() %>
+                      </div>
+                    </div>
+                    <div class="topic-main-info">
+                      <a href="/topic/<%= topic.id %>" class="topic-title-text">
+                        <%= topic.title %>
+                      </a>
+                      <div class="topic-meta-row">
+                        <div class="topic-badges">
+                          <span class="topic-category-badge" style="--cat-color: #f755a6;">
+                            <%= topic.description %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="category-cell">
+                    <span class="category-tag" style="--cat-color: #f59e0b;">
+                      <%= topic.category_name %>
+                    </span>
+                  </div>
+                  <div class="replies-cell">
+                    <span class="stat-number">
+                      <%= topic.posts_count %>
+                    </span>
+                  </div>
+
+                  <div class="activity-cell">
+                    <div class="last-activity">
+                      <a href="/user/prLk/<%= topic.author_id %>" class="topic-view__user-link">
+                        <div class="avatar-circle" style="--hue: 285;">
+
+                          <img src="/img/avas/<%= topic.author_avatar %>" class="topic-view__avatar">
+                        </div>
+                      </a>
+                      <!--<span class="last-activity-time">
+                        <%= new Date(topic.created_at).toLocaleString('ru-RU') %>
+                      </span>-->
+                    </div>
+                  </div>
+
+                  <div class="activity-cell">
+                    <div class="last-activity">
+                      <% if (user) { %>
+                        <button class="topic-view__btn report-btn" onclick="openTopRep(<%= topic.id %>)">
+                          Пожаловаться
+                        </button>
+                        <% } %>
+                    </div>
+                  </div>
+
+
+                </div>
+                <% }) %>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container">
+            <div class="pagination-info">
+
+            </div>
+            <div class="pagination-controls">
+
+              <% if (page> 1) { %>
+                <a class="pagination-btn"
+                  href="/topics?page=<%= page - 1 %>&sort=<%= sort %>&category=<%= categoryId || '' %>">
+                  ←
+                </a>
+                <% } %>
+
+                  <% for (let i=1; i <=totalPages; i++) { %>
+                    <a class="pagination-btn <%= page == i ? 'active' : '' %>"
+                      href="/topics?page=<%= i %>&sort=<%= sort %>&category=<%= categoryId || '' %>">
+                      <%= i %>
+                    </a>
+                    <% } %>
+
+                      <% if (page < totalPages) { %>
+                        <a class="pagination-btn"
+                          href="/topics?page=<%= page + 1 %>&sort=<%= sort %>&category=<%= categoryId || '' %>">
+                          →
+                        </a>
+                        <% } %>
+
+            </div>
+            <div class="per-page-selector">
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Add topic Modal -->
+        <div class="modal-overlay" id="topic-modal" onclick="closeModalOnOverlay(event)">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modal-title">Создание темы</h3>
+              <button class="modal-close" onclick="closeCreateTopicModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <form id="topic-form" method='POST' action='/modalCreateTopic'>
+
+              <div class="form-group">
+                <label for="event-name">Название топика</label>
+                <input type="text" id="title" name="title" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label for="event-name">Описание</label>
+                <input type="text" id="description" name="description" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label>Раздел</label>
+                  
+                <!-- parent -->
+                <select id="parent-category" class="filter-select"
+                  onchange="applyParent(this); updateChildFilter(this.value)">
+                  <option value="">Выберите раздел</option>
+                  <% categories.forEach(c=> { %>
+                    <option value="<%= c.id %>">
+                      <%= c.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Подраздел</label>
+
+                <!-- child -->
+                <select id="child-category" name="category_id" class="form-input">
+                  <option value="">Сначала выберите раздел</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span id="modal-submit-text">Создать</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeCreateTopicModal()">
+                  Отмена
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="modal-overlay" id="report-modal" onclick="closeModalOnOverlay(reason)">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modal-title">Пожаловаться</h3>
+              <button class="modal-close" onclick="closeTopRep()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <form id="report" method='POST' action='/repTop'>
+              <input type="hidden" id="report-post-id" name="top_id">
+              <div class="form-group">
+                <label for="reasons">Причина жалобы</label>
+                <select id="reason-list" name="report_id" class="form-input">
+
+                  <% reports.forEach(rep=> { %>
+                    <option value="<%= rep.id %>">
+                      <%= rep.name %>
+                    </option>
+                    <% }) %>
+
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span id="modal-submit-text">Отправить жалобу</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeReport()">
+                  Отмена
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+
+
+
+      <script>
+
+        const allChildCategories = <%- JSON.stringify(childCategories) %>;
+
+        function applyParent(select) {
+  const parentId = select.value;
+  const url = new URL(window.location.href);
+
+  if (parentId) {
+    url.searchParams.set("parent", parentId);
+    url.searchParams.delete("category");
+  } else {
+    url.searchParams.delete("parent");
+    url.searchParams.delete("category");
+  }
+
+  window.location.href = url.toString();
+}
+
+        function applyChild(select) {
+          const categoryId = select.value;
+
+          const url = new URL(window.location.href);
+
+          if (categoryId) {
+            url.searchParams.set("category", categoryId);
+          } else {
+            url.searchParams.delete("category");
+          }
+
+          window.location.href = url.toString();
+        }
+
+        function updateChildFilter(parentId) {
+          const childSelect = document.getElementById("child-category");
+
+          childSelect.innerHTML = `<option value="">Все подразделы</option>`;
+
+          const filtered = allChildCategories.filter(c =>
+  Number(c.parent_id) === Number(parentId)
+);
+
+          filtered.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.textContent = c.name;
+            childSelect.appendChild(opt);
+          });
+        }
+
+window.addEventListener("DOMContentLoaded", () => {
+  const parentSelect = document.querySelector("#parent-category");
+
+  const parentFromUrl = new URLSearchParams(window.location.search).get("parent");
+
+  if (parentFromUrl) {
+    parentSelect.value = parentFromUrl;
+    updateChildFilter(parentFromUrl);
+  }
+
+  const categoryFromUrl = new URLSearchParams(window.location.search).get("category");
+
+  if (categoryFromUrl) {
+    const childSelect = document.querySelector("#childFilter");
+    childSelect.value = categoryFromUrl;
+  }
+});
+
+        // ===============================
+        // OPEN CREATE MODAL
+        // ===============================
+        function openTopRep(topicId) {
+          const modal = document.getElementById('report-modal');
+          const input = document.getElementById('report-post-id');
+
+          input.value = topicId;
+
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        // ===============================
+        // CLOSE CREATE MODAL
+        // ===============================
+        function closeTopRep() {
+          const modal = document.getElementById('report-modal');
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        // ===============================
+        // CLOSE BY OVERLAY CLICK
+        // ===============================
+        function closeModalOnOverlayEdit(event) {
+          if (event.target.id === 'report-modal') {
+            closeTopRep();
+          }
+        }
+      </script>
+
+      <%- include('partials/footer') %>

@@ -1,0 +1,802 @@
+<%- include('partials/head') %>
+    <%- include('partials/header') %>
+        <div class="topic-view">
+
+            <!-- Хедер темы -->
+            <div class="topic-view__header">
+                <h1 class="topic-view__title">
+                    <%= topic.title %>
+                </h1>
+
+                <h3 class="topic-view__title">
+                    <%= topic.description %>
+                </h3>
+                <div class="topic-view__meta">
+                    <h1>
+                        <span>
+                            Статус темы: <%= topic.is_closed===1 ? 'Закрыта' : 'Открыта' %>
+                        </span>
+                    </h1>
+                </div>
+                <div class="topic-view__meta">
+                    <h3> <span>Автор: </span>
+                        <span>
+                            <%= topic.author_name %>
+                        </span>
+                    </h3>
+                </div>
+
+
+
+                <div class="topic-view__meta">
+                    <% if (topic.author_id===userId) { %>
+                        <button
+                            style="margin-left: 20px; padding: 5px 10px; background-color: #0a0612; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;"
+                            onclick='openTopicEdit({
+            title: `<%- topic.title %>`,
+            description: `<%- topic.description %>`,
+            categoryId: `<%- topic.category_id %>`,
+            parentId: `<%- topic.parent_category_id %>`,
+            isClosed: `<%- topic.is_closed %>`
+        })'>
+                            Редактировать тему
+                        </button>
+                        <% } %>
+                </div>
+            </div>
+
+            <!-- Список постов -->
+            <div class="topic-view__posts">
+
+                <% posts.forEach(post=> { %>
+
+
+
+                    <div class="topic-view__post" id="post-<%= post.id %>">
+
+                        <% if(post.parent_id){ %>
+                            <a href="#post-<%= post.parent_id %>" class="reply-preview">
+                                <div class="reply-preview__title">
+                                    Ответ пользователю <%= post.parent_username %>
+                                </div>
+
+                                <div class="reply-preview__text">
+                                    <%= post.parent_content.slice(0, 120) %>
+                                </div>
+                            </a>
+                            <% } %>
+
+                                <!-- Юзер -->
+
+                                <div class="topic-view__user">
+
+                                    <a href="/user/prLk/<%= post.author_id %>" class="topic-view__user-link">
+
+                                        <img src="/img/avas/<%= post.avatarca %>" class="topic-view__avatar">
+
+                                        <div class="topic-view__username">
+                                            <%= post.username %>
+                                        </div>
+
+                                    </a>
+
+                                </div>
+
+
+                                <!-- Контент -->
+                                <div class="topic-view__content">
+                                    <div class="topic-view__text">
+                                        <%= post.content %>
+
+                                            <!-- Первое изображение -->
+                                            <% if (post.image1) { %>
+                                                <div class="topic-view__image-wrapper">
+                                                    <img src="/img/uploadsPosts/<%= post.image1 %>"
+                                                        class="topic-view__image" alt="post image 1"
+                                                        onclick="openImageModal(this.src)">
+                                                </div>
+                                                <% } %>
+
+                                                    <!-- Второе изображение -->
+                                                    <% if (post.image2) { %>
+                                                        <div class="topic-view__image-wrapper">
+                                                            <img src="/img/uploadsPosts/<%= post.image2 %>"
+                                                                class="topic-view__image" alt="post image 2"
+                                                                onclick="openImageModal(this.src)">
+                                                        </div>
+                                                        <% } %>
+                                    </div>
+
+
+
+                                    <div class="topic-view__footer">
+                                        <span class="topic-view__date">
+                                            <%= new Date(post.created_at).toLocaleString() %>
+                                                <% if (post.updated_at) { %>
+                                                    <span>(ред)</span>
+                                                    <% } %>
+                                        </span>
+
+                                        <div class="topic-view__actions">
+
+                                            <% if (post.author_id !==userId) { %>
+                                                <button class="topic-view__btn report-btn"
+                                                    onclick="replyToPost(<%= post.id %>, '<%= post.username %>')">
+                                                    Ответить
+                                                </button>
+                                                <% } %>
+
+                                                    <% if (post.author_id===userId) { %>
+                                                        <button class="topic-view__btn report-btn"
+                                                            onclick='openRed(<%= post.id %>, `<%- post.content %>` )'>
+                                                            Редактировать
+                                                        </button>
+                                                        <% } %>
+
+                                                            <% if (post.author_id===userId) { %>
+                                                                <form method="POST" action="/delete/<%= topicId %>"
+                                                                    onsubmit="return confirm('Точно удалить?');">
+                                                                    <input type="hidden" name="post_id"
+                                                                        value="<%= post.id %>">
+                                                                    <button
+                                                                        class="topic-view__btn like-btn">Удалить</button>
+                                                                </form>
+                                                                <% } %>
+                                                                    <% if (post.author_id !==userId) { %>
+                                                                        <button class="topic-view__btn report-btn"
+                                                                            onclick="openReport(<%= post.id %>)">
+                                                                            Пожаловаться
+                                                                        </button>
+                                                                        <% } %>
+
+                                                                            <button
+                                                                                class="topic-view__btn like-btn <%= post.is_liked ? 'liked' : '' %>"
+                                                                                data-post-id="<%= post.id %>">
+                                                                                🖤 <span class="like-count">
+                                                                                    <%= post.likes_count %>
+                                                                                </span>
+                                                                            </button>
+
+                                                                            <button
+                                                                                class="topic-view__btn dislike-btn <%= post.is_disliked ? 'disliked' : '' %>"
+                                                                                data-post-id="<%= post.id %>">
+                                                                                👎🏻 <span class="dislike-count">
+                                                                                    <%= post.dislikes_count %>
+                                                                                </span>
+                                                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                    </div>
+                    <% }) %>
+            </div>
+            <% if (topic.is_closed !==1) { %>
+                <div class="topic-view__reply">
+
+                    <h3 class="topic-view__reply-title">Написать ответ</h3>
+
+                    <form method="POST" action="/reply/<%= topicId %>" enctype="multipart/form-data">
+                        <input type="hidden" name="parent_post_id" id="parent_post_id">
+
+                        <div id="reply-info" style="display:none;"></div>
+
+                        <textarea name="content" class="topic-view__textarea" placeholder="Напиши что-нибудь..."
+                            required minlength="3"></textarea>
+
+                        <div class="post-upload">
+                            <label for="image1" class="upload-btn">
+                                📎 Первое изображение
+                            </label>
+                            <input type="file" id="image1" name="image1" accept="image/*" hidden>
+                            <div id="file-name1" class="file-name"></div>
+                        </div>
+
+                        <div class="post-upload">
+                            <label for="image2" class="upload-btn">
+                                📎 Второе изображение
+                            </label>
+                            <input type="file" id="image2" name="image2" accept="image/*" hidden>
+                            <div id="file-name2" class="file-name"></div>
+                        </div>
+
+                        <% if (typeof error !=='undefined' && error==='empty' ) { %>
+                            <div class="error">Сообщение не может быть пустым</div>
+                            <% } %>
+
+                                <p> (JPG, PNG или GIF. Максимум 5MB на файл. Можно загрузить до 2 изображений)</p>
+                                <button type="submit" class="topic-view__submit">Отправить</button>
+                    </form>
+
+                </div>
+                <% } %>
+                    <div id="last"></div>
+        </div>
+        <div class="modal-overlay" id="report-modal" onclick="closeModalOnOverlay(reason)">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Пожаловаться</h3>
+                    <button class="modal-close" onclick="closeReport()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="report" method='POST' action='/report/<%= topicId %>'>
+                    <input type="hidden" id="report-post-id" name="post_id">
+                    <div class="form-group">
+                        <label for="reasons">Причина жалобы</label>
+                        <select id="reason-list" name="report_id" class="form-input">
+
+                            <% reports.forEach(rep=> { %>
+                                <option value="<%= rep.id %>">
+                                    <%= rep.name %>
+                                </option>
+                                <% }) %>
+
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span id="modal-submit-text">Отправить жалобу</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeReport()">
+                            Отмена
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Редактирование поста -->
+        <div class="modal-overlay" id="edit-modal" onclick="closeModalOnOverlay(event)">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h3 id="modal-title">Редактировать пост</h3>
+                    <button class="modal-close" onclick="closeEdit()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="edit" method='POST' action='/edit/<%= topicId %>' enctype="multipart/form-data">
+                    <input type="hidden" id="edit-post-id" name="post_id">
+                    <div class="form-group">
+                        <textarea name="content" id="edit-content" class="topic-view__textarea" rows="5"></textarea>
+                    </div>
+
+                    <div class="post-upload">
+                        <label for="edit-image1" class="upload-btn">
+                            📎 Заменить первое изображение
+                        </label>
+                        <input type="file" id="edit-image1" name="image1" accept="image/*" hidden>
+                        <div id="edit-file-name1" class="file-name"></div>
+                    </div>
+
+                    <div class="post-upload">
+                        <label for="edit-image2" class="upload-btn">
+                            📎 Заменить второе изображение
+                        </label>
+                        <input type="file" id="edit-image2" name="image2" accept="image/*" hidden>
+                        <div id="edit-file-name2" class="file-name"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span>Сохранить</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEdit()">
+                            Отмена
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Редактирование темы -->
+        <div class="modal-overlay" id="topic-modal" onclick="closeModalOnOverlay(event)">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Редактирование темы</h3>
+                    <button class="modal-close" onclick="closeCreateTopicModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="topic-form" method='POST' action='/modalEditTopic/<%= topicId %>'>
+
+                    <div class="form-group">
+                        <label for="event-name">Название топика</label>
+                        <input type="text" id="title" name="title" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-name">Описание</label>
+                        <input type="text" id="description" name="description" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category-parent">Раздел</label>
+
+                        <select id="edit-parent-category" class="form-input" onchange="updateEditChildren(this.value)">
+                            <option value="">Выберите раздел</option>
+
+                            <% categories.forEach(c=> { %>
+                                <option value="<%= c.id %>" <%=topic.parent_category_id==c.id ? 'selected' : '' %>>
+                                    <%= c.name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category-child">Подраздел</label>
+
+                        <select id="edit-child-category" name="category_id" class="form-input">
+                            <option value="">Сначала выберите раздел</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_closed">Статус темы</label>
+
+                        <select name="is_closed" id="is_closed" class="form-input">
+
+                            <option value="0" <%=topic.is_closed==0 ? 'selected' : '' %>>
+                                Открыта
+                            </option>
+
+                            <option value="1" <%=topic.is_closed==1 ? 'selected' : '' %>>
+                                Закрыта
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span id="modal-submit-text">Создать</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateTopicModal()">
+                            Отмена
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Модалка для увеличенного просмотра изображения -->
+        <div class="modal-overlay" id="image-modal" onclick="closeImageModal()">
+            <div class="image-modal-content">
+                <img id="modal-image" src="" alt="Увеличенное изображение">
+                <button class="image-modal-close" onclick="closeImageModal()">×</button>
+            </div>
+        </div>
+
+        <script>
+            const allChildCategories = JSON.parse('<%- JSON.stringify(childCategories || []) %>');
+
+            document.getElementById('edit-parent-category').addEventListener('change', function () {
+                updateEditChildren(this.value);
+            });
+
+            function updateEditChildren(parentId, selectedChildId = null) {
+                const child = document.getElementById('edit-child-category');
+                if (!child) return;
+
+                child.innerHTML = '<option value="">Выберите подраздел</option>';
+
+                if (!parentId) return;
+
+                allChildCategories
+                    .filter(c => String(c.parent_id) === String(parentId))
+                    .forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name;
+                        if (String(selectedChildId) === String(c.id)) {
+                            opt.selected = true;
+                        }
+                        child.appendChild(opt);
+                    });
+            }
+
+            // Обновляем обработчик события
+            document.getElementById('edit-parent-category').addEventListener('change', function () {
+                updateEditChildren(this.value);
+            });
+            const postImageInput = document.getElementById("post-image");
+            const fileName = document.getElementById("file-name");
+
+            if (postImageInput) {
+
+                postImageInput.addEventListener("change", () => {
+
+                    if (postImageInput.files.length > 0) {
+
+                        fileName.textContent =
+                            postImageInput.files[0].name;
+
+                    } else {
+
+                        fileName.textContent = "";
+
+                    }
+
+                });
+
+            }
+
+            function replyToPost(postId, username) {
+
+                document.getElementById("parent_post_id").value = postId;
+
+                document.getElementById("reply-info").style.display = "block";
+
+                document.getElementById("reply-info").innerHTML =
+                    `Ответ пользователю <strong>${username}</strong>`;
+
+                document.getElementById("reply-textarea")
+                    .focus();
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll(".like-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+
+                        const postId = btn.dataset.postId;
+
+                        if (!postId) {
+                            console.log("NO POST ID");
+                            return;
+                        }
+
+                        const res = await fetch("/like", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ postId })
+                        });
+
+                        let data;
+                        try {
+                            data = await res.json();
+                        } catch (e) {
+                            console.log("INVALID JSON RESPONSE");
+                            return;
+                        }
+
+                        // 💥 ВАЖНО: сначала проверяем авторизацию
+                        if (!res.ok) {
+                            if (data.error === "NOT_AUTH") {
+                                window.location.href = data.redirect;
+                                return;
+                            }
+
+                            console.log("LIKE ERROR", data);
+                            return;
+                        }
+
+                        const countEl = btn.querySelector(".like-count");
+                        let count = parseInt(countEl.textContent || "0");
+
+                        if (data.liked) {
+                            btn.classList.add("liked");
+                            count++;
+                        } else {
+                            btn.classList.remove("liked");
+                            count--;
+                        }
+
+                        countEl.textContent = count;
+                    });
+                });
+            });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll(".dislike-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+
+                        const postId = btn.dataset.postId;
+
+                        if (!postId) {
+                            console.log("NO POST ID");
+                            return;
+                        }
+
+                        const res = await fetch("/dislike", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ postId })
+                        });
+
+                        let data;
+                        try {
+                            data = await res.json();
+                        } catch (e) {
+                            console.log("INVALID JSON RESPONSE");
+                            return;
+                        }
+
+                        // 💥 ВАЖНО: сначала проверяем авторизацию
+                        if (!res.ok) {
+                            if (data.error === "NOT_AUTH") {
+                                window.location.href = data.redirect;
+                                return;
+                            }
+
+                            console.log("DISLIKE ERROR", data);
+                            return;
+                        }
+
+                        const countEl = btn.querySelector(".dislike-count");
+                        let count = parseInt(countEl.textContent || "0");
+
+                        if (data.disliked) {
+                            btn.classList.add("disliked");
+                            count++;
+                        } else {
+                            btn.classList.remove("disliked");
+                            count--;
+                        }
+
+                        countEl.textContent = count;
+                    });
+                });
+            });
+
+            // ===============================
+            // OPEN CREATE MODAL
+            // ===============================
+            function openReport(postId) {
+                const modal = document.getElementById('report-modal');
+                const input = document.getElementById('report-post-id');
+
+                input.value = postId;
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // ===============================
+            // CLOSE CREATE MODAL
+            // ===============================
+            function closeReport() {
+                const modal = document.getElementById('report-modal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // ===============================
+            // CLOSE BY OVERLAY CLICK
+            // ===============================
+            function closeModalOnOverlayEdit(event) {
+                if (event.target.id === 'report-modal') {
+                    closeReport();
+                }
+            }
+
+
+            function openRed(postId, content) {
+                const modal = document.getElementById('edit-modal');
+                const input = document.getElementById('edit-post-id');
+                const textarea = document.getElementById('edit-content');
+
+                console.log('openRed called with:', { postId, content }); // Для отладки
+
+                if (!input) {
+                    console.error('edit-post-id input not found');
+                    return;
+                }
+
+                if (!textarea) {
+                    console.error('edit-content textarea not found');
+                    return;
+                }
+
+                input.value = postId;
+                textarea.value = content;
+
+                // Очищаем информацию о файлах
+                const fileName1Edit = document.getElementById("edit-file-name1");
+                const fileName2Edit = document.getElementById("edit-file-name2");
+                if (fileName1Edit) fileName1Edit.textContent = "";
+                if (fileName2Edit) fileName2Edit.textContent = "";
+
+                // Сбрасываем поля выбора файлов
+                const editImage1 = document.getElementById("edit-image1");
+                const editImage2 = document.getElementById("edit-image2");
+                if (editImage1) editImage1.value = "";
+                if (editImage2) editImage2.value = "";
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeEdit() {
+
+                const modal = document.getElementById('edit-modal');
+
+                modal.classList.remove('active');
+
+                document.body.style.overflow = '';
+            }
+
+            // ===============================
+            // CLOSE BY OVERLAY CLICK
+            // ===============================
+            function closeModalOnOverlayEdit(event) {
+                if (event.target.id === 'report-modal') {
+                    closeReport();
+                }
+            }
+
+            function openTopicEdit(data) {
+                const modal = document.getElementById('topic-modal');
+
+                // Заполняем текстовые поля
+                document.getElementById('title').value = data.title || "";
+                document.getElementById('description').value = data.description || "";
+
+                // Заполняем статус темы
+                const isClosedSelect = document.getElementById('is_closed');
+                if (isClosedSelect) {
+                    isClosedSelect.value = data.isClosed || "0";
+                }
+
+                const parentSelect = document.getElementById('edit-parent-category');
+                const childSelect = document.getElementById('edit-child-category');
+
+                const parentId = String(data.parentId || "");
+                const categoryId = String(data.categoryId || "");
+
+                // Устанавливаем выбранный родительский раздел
+                parentSelect.value = parentId;
+
+                // Обновляем дочерние категории и выбираем нужную
+                if (parentId) {
+                    // Очищаем дочерний селект
+                    childSelect.innerHTML = '<option value="">Выберите подраздел</option>';
+
+                    // Находим и добавляем дочерние категории
+                    const children = allChildCategories.filter(c => String(c.parent_id) === String(parentId));
+
+                    children.forEach(child => {
+                        const option = document.createElement('option');
+                        option.value = child.id;
+                        option.textContent = child.name;
+                        if (String(child.id) === String(categoryId)) {
+                            option.selected = true;
+                        }
+                        childSelect.appendChild(option);
+                    });
+                } else {
+                    childSelect.innerHTML = '<option value="">Сначала выберите раздел</option>';
+                }
+
+                // Открываем модалку
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeCreateTopicModal() {
+
+                const modal = document.getElementById('topic-modal');
+
+                modal.classList.remove('active');
+
+                document.body.style.overflow = '';
+            }
+
+            // CLOSE BY OVERLAY CLICK
+            function closeModalOnOverlay(event) {
+
+                if (event.target.id === 'topic-modal') {
+
+                    closeCreateTopicModal();
+                }
+            }
+
+            // Обработчики для загрузки файлов в форме создания поста
+            const image1Input = document.getElementById("image1");
+            const fileName1 = document.getElementById("file-name1");
+            const image2Input = document.getElementById("image2");
+            const fileName2 = document.getElementById("file-name2");
+
+            if (image1Input) {
+                image1Input.addEventListener("change", () => {
+                    fileName1.textContent = image1Input.files.length > 0 ? image1Input.files[0].name : "";
+                });
+            }
+
+            if (image2Input) {
+                image2Input.addEventListener("change", () => {
+                    fileName2.textContent = image2Input.files.length > 0 ? image2Input.files[0].name : "";
+                });
+            }
+
+            // Обработчики для редактирования поста
+            function openRed(postId, content) {
+                const modal = document.getElementById('edit-modal');
+                const input = document.getElementById('edit-post-id');
+                const textarea = document.getElementById('edit-content');
+
+                input.value = postId;
+                textarea.value = content;
+
+                // Очищаем информацию о файлах
+                const fileName1Edit = document.getElementById("edit-file-name1");
+                const fileName2Edit = document.getElementById("edit-file-name2");
+                if (fileName1Edit) fileName1Edit.textContent = "";
+                if (fileName2Edit) fileName2Edit.textContent = "";
+
+                // Сбрасываем поля выбора файлов
+                const editImage1 = document.getElementById("edit-image1");
+                const editImage2 = document.getElementById("edit-image2");
+                if (editImage1) editImage1.value = "";
+                if (editImage2) editImage2.value = "";
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Обработчики для файлов в модалке редактирования
+            const editImage1 = document.getElementById("edit-image1");
+            const editFileName1 = document.getElementById("edit-file-name1");
+            const editImage2 = document.getElementById("edit-image2");
+            const editFileName2 = document.getElementById("edit-file-name2");
+
+            if (editImage1) {
+                editImage1.addEventListener("change", () => {
+                    editFileName1.textContent = editImage1.files.length > 0 ? editImage1.files[0].name : "";
+                });
+            }
+
+            if (editImage2) {
+                editImage2.addEventListener("change", () => {
+                    editFileName2.textContent = editImage2.files.length > 0 ? editImage2.files[0].name : "";
+                });
+            }
+
+            // Функции для модалки просмотра изображений
+            function openImageModal(src) {
+                const modal = document.getElementById('image-modal');
+                const modalImg = document.getElementById('modal-image');
+                if (modal && modalImg) {
+                    modal.classList.add('active');
+                    modalImg.src = src;
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeImageModal() {
+                const modal = document.getElementById('image-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+        </script>
+        <%- include('partials/footer') %>

@@ -1,0 +1,191 @@
+<%- include('partials/head') %>
+
+  <body>
+    <div class="bg-layer">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <%- include('partials/header') %>
+
+      <main class="main">
+        <!-- Hero Section -->
+        <section class="hero">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="pulse"></span>
+              Версия <%= settings.version %> уже здесь!
+            </div>
+            <h1 class="hero-title">
+              <span class="glitch" data-text="Добро пожаловать">Добро пожаловать</span>
+              <br>на борт <span class="highlight">Звездного Экспресса</span>
+            </h1>
+            <p class="hero-desc">
+              Сообщество Honkai Star Rail.
+              Обсуждайте билды, делитесь стратегиями, находите друзей.
+            </p>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <span class="stat-value">
+                  <%= usersCount %>
+                </span>
+                <span class="stat-label">Участников</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">
+                  <%= postsCount %>
+                </span>
+                <span class="stat-label">Сообщений</span>
+              </div>
+              <!--<div class="stat-item">
+            <span class="stat-value">1,247</span>
+            <span class="stat-label">Онлайн</span>
+          </div>-->
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-card floating">
+              <div class="hero-card-placeholder">
+                <img src="/img/<%= settings.patch %>">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Main Content -->
+          <div class="content-main">
+            <!-- Categories -->
+            <section class="section">
+              <div class="section-header">
+                <h2 class="section-title">
+                  <span class="title-icon">&#9670;</span>
+                  Разделы форума
+                </h2>
+                <!-- <a href="#" class="section-link">Все разделы &rarr;</a>-->
+              </div>
+
+              <div class="categories-grid">
+                <% categories.forEach(categorie=> { %>
+                  <a href="/dagCat/<%= categorie.id %>" class="category-card">
+                    <div class="category-icon" style="--accent: #ff6b9d;">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                      </svg>
+                    </div>
+                    <div class="category-info">
+                      <h3 class="category-name">
+                        <%= categorie.name %>
+                      </h3>
+                      <p class="category-desc">
+                        <%= categorie.description %>
+                      </p>
+                    </div>
+                    <div class="category-stats">
+                      <span>
+                        <%= categorie.topics_count %> тем
+                      </span>
+                      <span>
+                        <%= categorie.posts_count %> сообщений
+                      </span>
+                    </div>
+                    <div class="category-arrow">&rarr;</div>
+                  </a>
+                  <% }) %>
+              </div>
+
+            </section>
+
+            <!-- Latest Topics -->
+            <section class="section">
+              <div class="section-header">
+                <h2 class="section-title">
+                  <span class="title-icon">&#9733;</span>
+                  Последние темы
+                </h2>
+                <div class="section-tabs">
+
+                  <a href="/?sort=new" class="tab <%= sort === 'new' ? 'active' : '' %>">
+                    Новые
+                  </a>
+
+                  <a href="/?sort=popular" class="tab <%= sort === 'popular' ? 'active' : '' %>">
+                    Популярные
+                  </a>
+
+                  <a href="/?sort=posts" class="tab <%= sort === 'posts' ? 'active' : '' %>">
+                    По постам
+                  </a>
+
+                  <a href="/?sort=empty" class="tab <%= sort === 'empty' ? 'active' : '' %>">
+                    Без ответов
+                  </a>
+
+                </div>
+              </div>
+
+
+
+              <div class="topics-list">
+                <% lastTopics.forEach(topic=> { %>
+                  <article class="topic-card">
+                    <div class="topic-avatar">
+                      <div class="avatar-placeholder">
+                        <a href="/user/prLk/<%= topic.author_id %>" class="topic-view__user-link">
+                          <div class="avatar-circle" style="--hue: 285;">
+
+                            <img src="/img/avas/<%= topic.author_avatar %>" class="topic-view__avatar">
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="topic-content">
+                      <div class="topic-meta">
+  <span class="topic-category">
+    <%= topic.parent_category_name %>
+  </span>
+/
+  <span class="topic-category">
+     <%= topic.category_name %>
+  </span>
+</div>
+                      <h3 class="topic-title">
+                        <a href="/topic/<%= topic.id %>">
+                          <%= topic.title %>
+                        </a>
+                      </h3>
+                      <p class="topic-excerpt">
+                        <%= topic.description %>
+                      </p>
+                      <div class="topic-footer">
+                        <span class="topic-author">
+                          <%= topic.author_name %>
+                        </span>
+                        <span class="topic-time">
+                          <%= new Date(topic.created_at).toLocaleString('ru-RU') %>
+                        </span>
+                        <span class="topic-replies">
+                          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                          <%= topic.posts_count %>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                  <% }) %>
+
+              </div>
+              <a href="/topics" class="load-more">Показать больше тем</a>
+            </section>
+          </div>
+          <!-- Sidebar -->
+          <%- include('partials/indexRight') %>
+        </div>
+      </main>
+  </body>
+  <%- include('partials/footer') %>
